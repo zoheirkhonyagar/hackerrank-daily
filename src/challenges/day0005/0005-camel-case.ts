@@ -62,11 +62,43 @@ const getCommands = (standardCommands: string[]): Command[] => {
   return standardCommands.map(extractCommandFromStandardCommand);
 };
 
+const getResults = (commands: Command[]): string[] => {
+  return commands.map(getResult);
+};
+
+const handleType = () => {
+  return {
+    M: (): string => {},
+    C: (): string => {},
+    V: (): string => {},
+  };
+};
+
+const handleOperator = () => {
+  return {
+    S: (): string => {},
+    C: (): string => {},
+  };
+};
+
+const handleCombineOperator = (input: Command): string => {
+  const { type } = input;
+
+  return handleType()[type]();
+};
+
+const getResult = (command: Command): string => {
+  const { operator } = command;
+  return handleOperator()[operator]();
+};
+
 function main() {
   // Enter your code here
   const input: string[] = getInput();
 
   const commands: Command[] = getCommands(input);
+
+  const results = getResults(commands);
 
   // example
 
