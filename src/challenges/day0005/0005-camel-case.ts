@@ -84,11 +84,18 @@ const handleOperator = () => {
 const handleCombineOperator = (input: Command): string => {
   const { type } = input;
 
+  const isValidOperator = Object.values(CommandType).includes(type);
+  if (!isValidOperator) throw Error("Type is not valid");
+
   return handleType()[type]();
 };
 
 const getResult = (command: Command): string => {
   const { operator } = command;
+
+  const isValidOperator = Object.values(CommandOperator).includes(operator);
+  if (!isValidOperator) throw Error("Operator is not valid");
+
   return handleOperator()[operator]();
 };
 
