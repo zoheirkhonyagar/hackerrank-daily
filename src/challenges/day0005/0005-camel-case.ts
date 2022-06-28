@@ -62,41 +62,93 @@ const getCommands = (standardCommands: string[]): Command[] => {
   return standardCommands.map(extractCommandFromStandardCommand);
 };
 
-const getResults = (commands: Command[]): string[] => {
-  return commands.map(getResult);
+const handleCommands = (commands: Command[]): string[] => {
+  return commands.map(handleCommand);
 };
 
-const handleType = () => {
+enum OperatorType {
+  SM = "SM",
+  SC = "SC",
+  SV = "SV",
+  CM = "CM",
+  CC = "CC",
+  CV = "CV",
+}
+
+interface ParserFunc {
+  (input: ParserFuncInput): string;
+}
+
+interface ParserFuncInput {
+  mainString: string;
+}
+
+const handleParse = (): {
+  [key in OperatorType]: ParserFunc;
+} => {
   return {
-    M: (): string => {},
-    C: (): string => {},
-    V: (): string => {},
+    SM: splitMethod,
+    SC: splitClass,
+    SV: splitVariable,
+    CM: combineMethod,
+    CC: combineClass,
+    CV: combineVariable,
   };
 };
 
-const handleOperator = () => {
-  return {
-    S: (): string => {},
-    C: (): string => {},
-  };
+const splitMethod: ParserFunc = ({ mainString }): string => {
+  return "";
 };
 
-const handleCombineOperator = (input: Command): string => {
-  const { type } = input;
+const splitClass: ParserFunc = ({ mainString }): string => {
+  return "";
+};
+
+const splitVariable: ParserFunc = ({ mainString }): string => {
+  return "";
+};
+
+const combineMethod: ParserFunc = ({ mainString }) => {
+  return "";
+};
+
+const combineClass: ParserFunc = ({ mainString }) => {
+  return "";
+};
+
+const combineVariable: ParserFunc = ({ mainString }) => {
+  return "";
+};
+
+const handleType = (command: Command) => {
+  const { operator, type, mainString } = command;
+
+  const handleParseFunctionName = `${operator}${type}` as OperatorType;
 
   const isValidOperator = Object.values(CommandType).includes(type);
   if (!isValidOperator) throw Error("Type is not valid");
 
-  return handleType()[type]();
+  const parser: ParserFunc = handleParse()[handleParseFunctionName];
+
+  const result = parser({ mainString });
+
+  return result;
 };
 
-const getResult = (command: Command): string => {
+const handleOperator = (command: Command) => {
   const { operator } = command;
 
   const isValidOperator = Object.values(CommandOperator).includes(operator);
   if (!isValidOperator) throw Error("Operator is not valid");
 
-  return handleOperator()[operator]();
+  return {
+    S: (): string => handleType(command),
+    C: (): string => handleType(command),
+  };
+};
+
+const handleCommand = (command: Command): string => {
+  return handleOperator(command)[command.operator]();
 };
 
 function main() {
@@ -105,7 +157,7 @@ function main() {
 
   const commands: Command[] = getCommands(input);
 
-  const results = getResults(commands);
+  const results = handleCommands(commands);
 
   // example
 
