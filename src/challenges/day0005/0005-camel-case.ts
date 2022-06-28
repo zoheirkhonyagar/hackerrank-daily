@@ -120,13 +120,17 @@ const combineVariable: ParserFunc = ({ mainString }) => {
   return "";
 };
 
-const handleType = (command: Command) => {
+const validateType = (type: CommandType) => {
+  const isValidType = Object.values(CommandType).includes(type);
+  if (!isValidType) throw Error("Type is not valid");
+};
+
+const handleType = (command: Command): string => {
   const { operator, type, mainString } = command;
 
   const handleParseFunctionName = `${operator}${type}` as OperatorType;
 
-  const isValidOperator = Object.values(CommandType).includes(type);
-  if (!isValidOperator) throw Error("Type is not valid");
+  validateType(type);
 
   const parser: ParserFunc = handleParse()[handleParseFunctionName];
 
@@ -135,11 +139,15 @@ const handleType = (command: Command) => {
   return result;
 };
 
+const validateOperator = (operator: CommandOperator): void => {
+  const isValidOperator = Object.values(CommandOperator).includes(operator);
+  if (!isValidOperator) throw Error("Operator is not valid");
+};
+
 const handleOperator = (command: Command) => {
   const { operator } = command;
 
-  const isValidOperator = Object.values(CommandOperator).includes(operator);
-  if (!isValidOperator) throw Error("Operator is not valid");
+  validateOperator(operator);
 
   return {
     S: (): string => handleType(command),
@@ -166,6 +174,12 @@ function main() {
     "C;M;mouse pad",
     "C;C;code swarm",
     "S;C;OrangeHighlighter",
+    "S;M;plasticCup()",
+    "C;V;mobile phone",
+    "C;C;coffee machine",
+    "S;C;LargeSoftwareBook",
+    "C;M;white sheet of paper",
+    "S;V;pictureFrame",
   ];
 
   console.log(input);
