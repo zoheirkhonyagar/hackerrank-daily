@@ -1,19 +1,19 @@
 "use strict";
 
-process.stdin.resume();
-process.stdin.setEncoding("utf-8");
-let inputString: string = "";
-let inputLines: string[] = [];
-let currentLine: number = 0;
-process.stdin.on("data", function (inputStdin: string): void {
-  inputString += inputStdin;
-});
+// process.stdin.resume();
+// process.stdin.setEncoding("utf-8");
+// let inputString: string = "";
+// let inputLines: string[] = [];
+// let currentLine: number = 0;
+// process.stdin.on("data", function (inputStdin: string): void {
+//   inputString += inputStdin;
+// });
 
-process.stdin.on("end", function (): void {
-  inputLines = inputString.split("\n");
-  inputString = "";
-  main();
-});
+// process.stdin.on("end", function (): void {
+//   inputLines = inputString.split("\n");
+//   inputString = "";
+//   main();
+// });
 
 function readLine(): string {
   return inputLines[currentLine++];
@@ -87,37 +87,90 @@ const handleParse = (): {
   [key in OperatorType]: ParserFunc;
 } => {
   return {
-    SM: splitMethod,
-    SC: splitClass,
-    SV: splitVariable,
+    SM: splitCommand,
+    SC: splitCommand,
+    SV: splitCommand,
     CM: combineMethod,
     CC: combineClass,
     CV: combineVariable,
   };
 };
 
-const splitMethod: ParserFunc = ({ mainString }): string => {
-  return "";
+const removeSpecialCharacters = ({
+  mainString,
+}: {
+  mainString: string;
+}): string => {
+  return mainString.includes("()")
+    ? mainString.substring(0, mainString.length - 2)
+    : mainString;
 };
 
-const splitClass: ParserFunc = ({ mainString }): string => {
-  return "";
+const extractWords = (mainString: string): string[] => {
+  let pointer = 0;
+
+  let commaSeparatedWords: string = "";
+
+  const normalizedString = removeSpecialCharacters({ mainString });
+
+  for (let character of normalizedString) {
+    if (character === character.toUpperCase() && pointer !== 0) {
+      commaSeparatedWords += ",";
+    }
+    commaSeparatedWords += character.trim().toLowerCase();
+    ++pointer;
+  }
+
+  return commaSeparatedWords.split(",") || [];
 };
 
-const splitVariable: ParserFunc = ({ mainString }): string => {
-  return "";
+const splitCommand: ParserFunc = ({ mainString }): string => {
+  const words: string[] = extractWords(mainString);
+
+  const result = words.join(" ");
+
+  return result;
 };
 
 const combineMethod: ParserFunc = ({ mainString }) => {
-  return "";
+  const words: string[] = extractWords(mainString);
+
+  const result = words
+    .map((value, index) => {
+      return index === 0
+        ? value.toLowerCase()
+        : `${value[0].toUpperCase()}${value.substring(1)}`;
+    })
+    .join("")
+    .concat("()");
+
+  return result;
 };
 
 const combineClass: ParserFunc = ({ mainString }) => {
-  return "";
+  const words: string[] = extractWords(mainString);
+
+  const result = words
+    .map((value) => {
+      return `${value[0].toUpperCase()}${value.substring(1)}`;
+    })
+    .join("");
+
+  return result;
 };
 
 const combineVariable: ParserFunc = ({ mainString }) => {
-  return "";
+  const words: string[] = extractWords(mainString);
+
+  const result = words
+    .map((value, index) => {
+      return index === 0
+        ? value.toLowerCase()
+        : `${value[0].toUpperCase()}${value.substring(1)}`;
+    })
+    .join("");
+
+  return result;
 };
 
 const validateType = (type: CommandType) => {
@@ -135,6 +188,8 @@ const handleType = (command: Command): string => {
   const parser: ParserFunc = handleParse()[handleParseFunctionName];
 
   const result = parser({ mainString });
+
+  extractWords(mainString);
 
   return result;
 };
@@ -159,28 +214,34 @@ const handleCommand = (command: Command): string => {
   return handleOperator(command)[command.operator]();
 };
 
+function printResult(commands: string[]) {
+  commands.map((command) => process.stdout.write(`${command} \n`));
+}
+
 function main() {
   // Enter your code here
   const input: string[] = getInput();
+
+  // example
+
+  // const input = [
+  //   "S;V;iPad",
+  //   "C;M;mouse pad",
+  //   "C;C;code swarm",
+  //   "S;C;OrangeHighlighter",
+  //   "S;M;plasticCup()",
+  //   "C;V;mobile phone",
+  //   "C;C;coffee machine",
+  //   "S;C;LargeSoftwareBook",
+  //   "C;M;white sheet of paper",
+  //   "S;V;pictureFrame",
+  // ];
 
   const commands: Command[] = getCommands(input);
 
   const results = handleCommands(commands);
 
-  // example
-
-  const testCommands = [
-    "S;V;iPad",
-    "C;M;mouse pad",
-    "C;C;code swarm",
-    "S;C;OrangeHighlighter",
-    "S;M;plasticCup()",
-    "C;V;mobile phone",
-    "C;C;coffee machine",
-    "S;C;LargeSoftwareBook",
-    "C;M;white sheet of paper",
-    "S;V;pictureFrame",
-  ];
-
-  console.log(input);
+  printResult(results);
 }
+
+main();
